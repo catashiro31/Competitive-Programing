@@ -1,0 +1,6 @@
+1 --> https://cses.fi/problemset/task/1748               MEDIUM
+2 --> https://oj.vnoi.info/problem/bedao_m03_covigame               MEDIUM
+3 --> https://oj.vnoi.info/problem/bedao_m10_hidden               EASY
+4 --> https://oj.vnoi.info/problem/bedao_m10_raid               HARD
+5 --> https://oj.vnoi.info/problem/bedao_m24_d               HARD
+6 --> https://usaco.org/index.php?page=viewproblem2&cpid=1041               MEDIUM
