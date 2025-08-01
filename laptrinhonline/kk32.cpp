@@ -15,34 +15,36 @@ using OST = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_
 #define lb lower_bound
 #define ub upper_bound
 const int MOD = 1e9 + 7;
-const int MAXN = 2e5 + 1;
+const int MAXN = 1e5 + 1;
 const string NoF = "Name_of_File";
-ll kq = 0;
-pair<ll,ll> DFS(int u, int par, const vector<vector<int>> &adjList, vector<ll> &val) {
-	ll ans = 0, tmp = 0;
+int n;
+vector<int> adjList[MAXN];
+vector<ll> val(MAXN);
+pair<ll, ll> DFS(int u, int par) {
+	ll add = 0, sub = 0;
 	for (int v : adjList[u]) {
 		if (v == par) continue;
-		auto e = DFS(v,u,adjList,val);
-		val[u] += e.fi+e.se;
-		tmp += e.fi;
+		auto [a,s] = DFS(v, u);
+		add = max(add,a);
+		sub = max(sub,s);
 	}
-	kq += abs(val[u]);
-	ans = -val[u];
-	return {ans,tmp};
+	val[u] += add - sub;
+	if (val[u] >= 0) sub += val[u];
+	else add -= val[u];
+	val[u] = 0;
+	return {add, sub};
 }
 void solve() {
-	int n; cin >> n;
-	vector<vector<int>> adjList(n);
+	cin >> n;
 	for (int i = 0; i < n-1; i++) {
-		int u, v; cin >> u  >> v;
+		int u, v; cin >> u >> v;
 		--u, --v;
 		adjList[u].psb(v);
 		adjList[v].psb(u);
 	}
-	vector<ll> val(n);
-	for (ll &x : val) cin >> x;
-	auto z = DFS(0,-1,adjList,val);
-	cout << kq;
+	for (int i = 0; i < n; i++) cin >> val[i];
+	auto [add, sub] = DFS(0, -1);
+	cout << add + sub;
 }
 
 int main() {
