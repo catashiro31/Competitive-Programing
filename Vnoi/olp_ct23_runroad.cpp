@@ -1,61 +1,80 @@
-#include<bits/stdc++.h>
-#define pb push_back
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace std;
+using namespace __gnu_pbds;
+using ll = long long;
+template <typename T>
+using OST = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+#define sz(x) (int)(x).size()
+#define all(x) x.begin(), x.end()
+#define psb push_back
+#define ppb pop_back
+#define endl '\n'
 #define fi first
 #define se second
-#define endl "\n"
-#define mod 1000000007
-using ll = long long;
-using namespace std;
+#define lb lower_bound
+#define ub upper_bound
+const int MOD = 1e9 + 7;
+const int MAXN = 2e5 + 11;
 const string NoF = "Name_of_File";
-void solve() {
-	int n; cin >> n;
-	long t; cin >> t;
-	vector<long> h(n);
-	for (long &x : h) cin >> x;
-	vector<vector<int>> adjList(n);
-	for (int i = 0; i < n-1; i++) {
-		int u, v; cin >> u >> v;
-		--u, --v;
-		adjList[u].pb(v);
-		adjList[v].pb(u);
+int n, t;
+vector<int> adjList[MAXN];
+int h[MAXN];
+bool visited[MAXN];
+ll s[MAXN];
+void dfs(int u, int par, int lim) {
+	visited[u] = true;
+	s[u] = 1;
+	for (int v : adjList[u]) {
+		if (visited[v] || h[v] > lim) continue;
+		dfs(v,u,lim);
+		s[u] += s[v];
 	}
-	
-	vector<vector<pair<int,long>>> dp(n,vector<pair<int,long>>(n,{INT_MAX,LONG_MIN}));
-	for (int i = 0; i < n; i++) {
-		queue<int> q; q.push(i);
-		dp[i][i] = {0,h[i]};
-		while (!q.empty()) {
-			int u = q.front(); q.pop();
-			for (int v : adjList[u]) {
-				if (dp[i][v].fi != INT_MAX) continue;
-				dp[i][v].fi = dp[i][u].fi + 1;
-				dp[i][v].se = max(dp[i][u].se,h[v]);
-				q.push(v);
-			}
-		}
-	}
-	
-	ll kq = 0;
-	for (int i = 0; i < n-2; i++) {
-		for (int j = i+1; j < n-1; j++) {
-			for (int k = j+1; k < n; k++) {
-				long hmax = max(max(dp[i][j].se,dp[j][k].se),dp[k][i].se);
-				if (hmax != t) continue;
-				kq += dp[i][j].fi + dp[j][k].fi + dp[k][i].fi;
-				kq %= mod;
-			}
-		}
-	}
-	cout << kq;
-//	for (int i = 0; i < n; i++) {
-//		for (int j = 0; j < n; j++) cout << dp[i][j].fi << " ";
-//		cout << endl;
-//	}
 }
+ll cal(int u, int par, int lim, ll NumNode) {
+	ll res = s[u];
+	res = (res * ((NumNode - s[u] + MOD) % MOD)) % MOD;
+	res = (res * ((NumNode - 2LL + MOD) % MOD)) % MOD;
+	for (int v : adjList[u]) {
+		if (v != par && h[v] <= lim) {
+			res = (res + cal(v,u,lim,NumNode)) % MOD;
+		}
+	}
+	return res;
+}
+ll f(int lim) {
+	for (int i = 0; i <= n; i++) visited[i] = false;
+	ll res = 0;
+	for (int i = 1; i <= n; i++) {
+		if (!visited[i] && h[i] <= lim) {
+			dfs(i, -1, lim);
+			res = (res + cal(i,-1,lim,s[i])) % MOD;
+		}
+	}
+	return res;
+}
+void solve() {
+	cin >> n >> t;
+	for (int i = 1; i <= n; i++) cin >> h[i];
+	for (int i = 1; i < n; i++) {
+		int u, v; cin >> u >> v;
+		adjList[u].psb(v);
+		adjList[v].psb(u);
+	}
+	ll kq = (f(t) - f(t-1) + MOD) % MOD;
+	cout << kq << endl;
+}
+	
 int main() {
-	ios_base::sync_with_stdio(false);
-	cin.tie(NULL); cout.tie(NULL);
-//	freopen((NoF + ".in").c_str(),"r",stdin);
-//	freopen((NoF + ".out").c_str(),"w",stdout);
-	solve();
+#ifndef ONLINE_JUDGE
+	// freopen((NoF + ".in").c_str(), "r", stdin);
+	// freopen((NoF + ".out").c_str(), "w", stdout);
+#endif
+	ios_base::sync_with_stdio(0);
+	cin.tie(0); cout.tie(0);
+	int test = 1;
+	while(test--) {
+		solve();
+	}
 }
