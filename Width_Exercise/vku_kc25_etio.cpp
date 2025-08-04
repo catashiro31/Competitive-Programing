@@ -62,8 +62,8 @@ void solve() {
         m1 = (*it1).fi;
         y1 = y;
     }
-    xau(d1,m1,y1);
-    xau(d2,m2,y2);
+    printf("%02d/%02d/%04d\n",d1,m1,y1);
+    printf("%02d/%02d/%04d",d2,m2,y2);
 }
     
 int main() {

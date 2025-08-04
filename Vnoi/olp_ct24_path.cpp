@@ -1,99 +1,91 @@
-#include<bits/stdc++.h>
-#define pb push_back
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace std;
+using namespace __gnu_pbds;
+using ll = long long;
+template <typename T>
+using OST = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+#define sz(x) (int)(x).size()
+#define all(x) x.begin(), x.end()
+#define psb push_back
+#define ppb pop_back
+#define endl '\n'
 #define fi first
 #define se second
-#define endl "\n"
-#define mod 1000000007
-using ll = long long;
-using namespace std;
-ll modulo(ll base, ll exp) {
-	ll kq = 1;
-	while (exp/=2) {
-		if (exp % 2) kq = (kq*base) % mod;
-		base = (base*base) % mod;
+#define lb lower_bound
+#define ub upper_bound
+const int MOD = 1e9 + 7;
+const int MAXN = 2e5 + 1;
+const string NoF = "Name_of_File";
+ll fact[MAXN], inv[MAXN];
+ll inv_modulo(ll base, ll exp) {
+	ll res = 1;
+	while (exp) {
+		if (exp&1) res = (res * base) % MOD;
+		base = (base * base) % MOD;
+		exp /= 2;
 	}
-	return kq;
+	return res;
+}
+ll combination(ll n, ll k) {
+	if (k > n || k < 0 || n < 0) return 0;
+	ll res = fact[n];
+	res = (res * inv[k]) % MOD;
+	res = (res * inv[n-k]) % MOD;
+	return res;
+}
+void init(void) {
+	fact[0] = 1, inv[0] = inv_modulo(fact[0],MOD-2);
+	for (int i = 1;  i < MAXN; i++) {
+		fact[i] = (fact[i-1] * i) % MOD;
+		inv[i] = inv_modulo(fact[i],MOD-2);
+	}
 }
 void solve() {
 	int m, n, k; cin >> m >> n >> k;
-	vector<vector<ll>> grid(1e3,vector<ll> (1e3,0));
+	vector<vector<bool>> blocked(1e3+3, vector<bool>(1e3+3, false));
+	int maxr = 1, maxc = 1;
 	for (int i = 0; i < k; i++) {
-		int x,y; cin >> x >> y;
-		grid[--x][--y] = -1;
+		int r, c; cin >> r >> c;
+		blocked[r][c] = true;
+		maxr = max(maxr,r);
+		maxc = max(maxc,c);
 	}
-	
-	for (int x = 0; x < 1e3; x++) {
-		for (int y = 0; y < 1e3; y++) {
-			if (grid[x][y] == -1) {
-				grid[x][y] = 0;
-				continue;
-			}
-			if (x == 0 && y == 0) grid[x][y] = 1;
-			else if (x == 0) grid[x][y] = grid[x][y-1] % mod;
-			else if (y == 0) grid[x][y] = grid[x-1][y] % mod;
-			else grid[x][y] = (grid[x][y-1] + grid[x-1][y]) % mod;
+	init();
+	vector<vector<ll>> dp(maxr+1, vector<ll>(maxc+1,0));
+	dp[1][1] = 1;
+	for (int i = 1; i <= maxr; i++) {
+		for (int j = 1; j <= maxc; j++) {
+			if (i == 1 && j == 1) continue;
+			if (blocked[i][j]) continue;
+			dp[i][j] = (dp[i-1][j] + dp[i][j-1]) % MOD;
 		}
-	} 
-	
-	int px = m-1, py = n-1;
-	ll kq = 0;
-	if (px >= 1e3 && py < 1e3) {
-		for (int y = 0; y <= py; y++) {
-			ll tmp = grid[1e3-1][y];
-			ll nub1 = 1 , nub2 = 1, nub3 = 1;
-			for (int i = 2; i <= px-1e3+py-y; i++) {
-				nub1 *= i; nub1 %= mod;
-				if (nub2 <= px-1e3) nub2 *= i; nub2 %= mod;
-				if (nub3 <= py-y) nub3 *= i; nub3 %= mod;
-			}
-			nub2 = modulo(nub2,mod-2);
-			nub3 = modulo(nub3,mod-2);
-			tmp = (tmp * nub1)%mod;
-			tmp = (tmp * nub2)%mod;
-			tmp = (tmp * nub3)%mod;
-			kq =(kq+tmp)%mod;
-		}
-	} else if (px < 1e3 && py >= 1e3) {
-		for (int x = 0; x <= px; x++) {
-			ll tmp = grid[x][1e3-1];
-			ll nub1 = 1, nub2 = 1, nub3 = 1;
-			for (int i = 1; i <= px-x+py-1e3; i++) {
-				nub1 *= i; nub1 %= mod;
-				if (nub2 <= px-x) nub2 *= i; nub2 %= mod;
-				if (nub3 <= py-1e3) nub3 *= i; nub3 %= mod;
-			}
-			nub2 = modulo(nub2,mod-2);
-			nub3 = modulo(nub3,mod-2);
-			tmp = (tmp * nub1)%mod;
-			tmp = (tmp * nub2)%mod;
-			tmp = (tmp * nub3)%mod;
-			kq = (kq+tmp)%mod;
-		}	
-	} else if (px < 1e3 && py < 1e3) kq = grid[px][py];
+	}
+	if (m == maxr && n == maxc) cout << dp[maxr][maxc];
 	else {
-		for (int x = 0; x < 1e3; x++) {
-			ll tmp = grid[x][1e3-1];
-			ll nub1 = 1, nub2 = 1, nub3 = 1;
-			for (int i = 1; i <= px-x+py-1e3; i++) {
-				nub1 *= i; nub1%=mod;
-				if (nub2 <= px-x) nub2 *= i; nub2%=mod;
-				if (nub3 <= py-1e3) nub3 *= i; nub3%mod;
-			}
-			nub2 = modulo(nub2,mod-2);
-			nub3 = modulo(nub3,mod-2);
-			tmp = (tmp * nub1)%mod;
-			tmp = (tmp * nub2)%mod;
-			tmp = (tmp * nub3)%mod;
-			kq = (kq+tmp)%mod;
+		ll kq = 0;
+		for (int i = 1; i <= maxr; i++) {
+			ll value = (dp[i][maxc] * combination(m-i + n-maxc-1, m-i)) % MOD;
+			kq = (kq + value) % MOD;
 		}
-		kq = (kq*2)%mod;
+		for (int j = 1; j <= maxc; j++) {
+			ll value = (dp[maxr][j] * combination(m-maxr-1 + n-j, n-j)) % MOD;
+			kq = (kq + value) % MOD;
+		}
+		cout << kq;
 	}
-	cout << kq;
 }
+	
 int main() {
-	ios_base::sync_with_stdio(false);
-	cin.tie(NULL); cout.tie(NULL);
-//	freopen("input.txt","r",stdin);
-//	freopen("output.txt","w",stdin);
-	solve();
+#ifndef ONLINE_JUDGE
+	// freopen((NoF + ".in").c_str(), "r", stdin);
+	// freopen((NoF + ".out").c_str(), "w", stdout);
+#endif
+	ios_base::sync_with_stdio(0);
+	cin.tie(0); cout.tie(0);
+	int t = 1;
+	while(t--) {
+		solve();
+	}
 }

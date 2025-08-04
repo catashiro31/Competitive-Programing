@@ -20,28 +20,24 @@ const int MAXN = 2e5 + 1;
 const string NoF = "Name_of_File";
     
 void solve() {
-    ll n, x, k; cin >> n >> x >> k;
-    string s; cin >> s;
-    ll i = 0;
-    while (i < k && x != 0) {
-        if (s[i%n] == 'L') x--;
-        else x++;
+    int n; cin >> n;
+    vector<ll> w(n), s(n), v(n);
+    vector<int> idx(n);
+    for (int i = 0; i < n; i++) {
+        idx[i] = i;
+        cin >> w[i] >> s[i] >> v[i];
     }
-    if (i == k) {
-        if (x)
-    } else {
-        int ck = 0;
-        for (int j = 0; j < n; j++) {
-            if (x == 0) {
-                ck = j;
-                break;
-            }
-            if (s[i%n] == 'L') x--;
-            else x++;
-            i++;
+    sort(all(idx),[&](auto &a, auto &b){
+        return w[a]+s[a] < w[b]+s[b];
+    });
+    vector<ll> dp(2e5+1,0);
+    for (int x = 0; x < n; x++) {
+        int i = idx[x];
+        for (ll j = s[i]+w[i]; j >= w[i]; j--) {
+            dp[j] = max(dp[j],dp[j-w[i]] + v[i]);
         }
-
     }
+    cout << *max_element(all(dp));
 }
     
 int main() {
@@ -51,7 +47,7 @@ int main() {
 #endif
     ios_base::sync_with_stdio(0);
     cin.tie(0); cout.tie(0);
-    int t = 1; cin >> t;
+    int t = 1;
     while(t--) {
         solve();
     }
