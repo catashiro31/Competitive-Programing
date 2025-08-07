@@ -23,12 +23,17 @@ void solve() {
     int n; cin >> n;
     vector<pair<int,int>> arr(n);
     for (auto &[l,w] : arr) cin >> l >> w;
-    sort(all(arr),[](auto a, auto b) {
-        return (a.fi <= b.fi && a.se <= b.se);
+    sort(all(arr),[](auto &a, auto &b) {
+        if (a.fi != b.fi) return a.fi < b.fi;
+        return a.se < b.se;
     });
-    cout << "--" << endl;
-    for (auto [l,w] : arr) cout << l << " " << w << endl;
-    cout << "--" << endl;
+    multiset<int> ms;
+    for (int i = n-1; i >= 0; i--) {
+        auto it = ms.lb(arr[i].se);
+        if (it != ms.end()) ms.erase(it), ms.insert(arr[i].se);
+        else ms.insert(arr[i].se);
+    }
+    cout << sz(ms) << endl;
 }
     
 int main() {
