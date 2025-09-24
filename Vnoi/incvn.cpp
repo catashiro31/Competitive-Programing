@@ -41,7 +41,7 @@ void solve() {
     for (int i = 0; i < n; i++) cin >> s[i];
     vector<int> a = s;
     sort(all(a));
-    a.erase(unique(all(a), a.end()));
+    a.erase(unique(all(a)), a.end());
     auto rank_of = [&](int v){
         return int(lower_bound(a.begin(), a.end(), v) - a.begin()) + 1;
     };
