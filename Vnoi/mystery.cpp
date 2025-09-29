@@ -15,15 +15,30 @@ using OST = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_
 #define se second
 #define lb lower_bound
 #define ub upper_bound
-const int MOD = 1e9 + 7;
-const int MAXN = 2e5 + 1;
+const int MOD = 20122007;
+const int MAXN = 2e5+1;
 const string NoF = "Name_of_File";
-    
+ll pow_mod(ll base, ll exp) {
+    ll res = 1;
+    while(exp) {
+        if (exp&1) res = (res*base)%MOD;
+        base = (base*base)%MOD;
+        exp /= 2;
+    }
+    return res;
+}
 void solve() {
-    int n; cin >> n;
-    vector<int> a(n);
-    for (int &x : a) cin >> x;
-    
+    ll a; cin >> a;
+    vector<ll> uoc;
+    for (ll i = 1; i*i <= a; i++) {
+        if (a%i == 0) {
+            uoc.psb(i);
+            if (a/i != i) uoc.psb(a/i);
+        }
+    }
+    ll kq = 1;
+    for (ll x : uoc) kq = (kq * (pow_mod(3,x) -1 + MOD)%MOD)%MOD;
+    cout << kq;
 }
     
 int main() {

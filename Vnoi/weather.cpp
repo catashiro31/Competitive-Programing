@@ -10,6 +10,7 @@ using OST = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_
 #define all(x) x.begin(), x.end()
 #define psb push_back
 #define ppb pop_back
+#define endl '\n'
 #define fi first
 #define se second
 #define lb lower_bound
@@ -17,24 +18,37 @@ using OST = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_
 const int MOD = 1e9 + 7;
 const int MAXN = 2e5 + 1;
 const string NoF = "Name_of_File";
-    
+int res = 0;
+stack<int> st;
+void dfs(int u, vector<int> &visited, const vector<int> adjList[], vector<int> &incycle) {
+    visited[u] = 1;
+    for (int v : adjList[u]) {
+        if (visited[v] == 1) continue; {
+            
+        }
+        dfs(v,visited,adjList);
+    }
+    visited[u] = 2;
+}
 void solve() {
-    int n, m; cin >> n >> m;
-    vector<vector<int>> adjList(n);
+    int n; cin >> n;
+    int m; cin >> m;
+    vector<int> adjList[n];
     for (int i = 0; i < m; i++) {
         int u, v; cin >> u >> v;
         --u, --v;
         adjList[u].psb(v);
         adjList[v].psb(u);
     }
-    
+    int kq = 0;
+    for (int i = 0; i < n; i++) {
+        
+    }
 }
     
 int main() {
-#ifndef ONLINE_JUDGE
     // freopen((NoF + ".in").c_str(), "r", stdin);
     // freopen((NoF + ".out").c_str(), "w", stdout);
-#endif
     ios_base::sync_with_stdio(0);
     cin.tie(0); cout.tie(0);
     int t = 1;

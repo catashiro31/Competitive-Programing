@@ -21,9 +21,18 @@ const string NoF = "Name_of_File";
     
 void solve() {
     int n; cin >> n;
-    vector<int> a(n);
-    for (int &x : a) cin >> x;
-    
+    vector<ll> ox(1e5+5,0), oy(1e5+5,0);
+    vector<pair<int,int>> xy(n);
+    for (int i = 0; i < n; i++) {
+        cin >> xy[i].fi >> xy[i].se;
+        ox[xy[i].fi]++, oy[xy[i].se]++;
+    }
+    ll kq = 0;
+    for (int i = 0; i < n; i++) {
+        auto [x,y] = xy[i];
+        kq += (ox[x]-1LL)*(oy[y]-1LL);
+    }
+    cout << kq;
 }
     
 int main() {
