@@ -1,156 +1,82 @@
-//#include <bits/stdc++.h>
-//#include <chrono>
-//using namespace std;
-//int main() {
-//    ios_base::sync_with_stdio(false);
-//    cin.tie(NULL);
-//    int n, Q;
-//    cin >> n >> Q;
-//    vector<long> arr(n);
-//    for (int i = 0; i < n; i++) {
-//        cin >> arr[i];
-//    }
-//    vector<pair<int, int>> trv(Q);
-//    for (int i = 0; i < Q; i++) {
-//        cin >> trv[i].first >> trv[i].second;
-//    }
-//    vector<vector<long>> xList;
-//    vector<bool> xcheck(n, false);
-//    for (int i = 0; i < n; i++) {
-//        if (!xcheck[i]) {
-//            vector<long> xlist;
-//            xlist.push_back(arr[i]);
-//            long tmp = arr[i];
-//            xcheck[i] = true;
-//            for (int j = i + 1; j < n; j++) {
-//                if (tmp < arr[j]) {
-//                    tmp = arr[j];
-//                    xlist.push_back(arr[j]);
-//                    xcheck[j] = true;
-//                }
-//            }
-//            xList.push_back(xlist);
-//        }
-//    }
-//    vector<vector<long>> nList;
-//    vector<bool> ncheck(n, false);
-//    for (int i = n-1; i >= 0; i--) {
-//        if (!ncheck[i]) {
-//            vector<long> nlist;
-//            nlist.push_back(arr[i]);
-//            long tmp = arr[i];
-//            ncheck[i] = true;
-//            for (int j = i -1; j >= 0; j--) {
-//                if (tmp < arr[j]) {
-//                    tmp = arr[j];
-//                    nlist.push_back(arr[j]);
-//                    ncheck[j] = true;
-//                }
-//            }
-//            nList.push_back(nlist);
-//        }
-//    }
-////    for (auto nlt : nList) {
-////    	for (long x : nlt) cout << x << " ";
-////    	cout << '\n';
-////	}
-//    for (int i = 0; i < Q; i++) {
-//        int start = trv[i].first - 1;
-//        int act = trv[i].second;
-//        long kq;
-//        for (auto& xlt : xList) {
-//            auto xit = find(xlt.begin(), xlt.end(), arr[start]);
-//            if (xit != xlt.end()) {
-//                if (distance(xit, xlt.end()) > act) {
-//                    kq =  *(xit + act);
-//                } else {
-//                    kq = *(xlt.end() - 1);
-//                }
-//                break;
-//            }
-//        }
-//        for (auto& nlt : nList) {
-//            auto nit = find(nlt.begin(), nlt.end(), arr[start]);
-//            if (nit != nlt.end()) {
-//                if (distance(nit, nlt.end()) > act) {
-//                    kq =  max(kq,*(nit + act));
-//                } else {
-//                    kq = max(kq,*(nlt.end() - 1));
-//                }
-//                break;
-//            }
-//        }
-//        cout << kq << '\n';
-//    }
-//    return 0;
-//}
-#include <iostream>
-#include <vector>
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
 using namespace std;
-
-int N, Q;
-vector<long long> h;
-vector<int> left_max, right_max;
-
-void preprocess() {
-    // Tính toán mảng left_max
-    left_max[0] = 0;
-    for (int i = 1; i < N; ++i) {
-        if (h[i] > h[i - 1]) {
-            left_max[i] = left_max[i - 1];
-        } else {
-            left_max[i] = i;
-        }
+using namespace __gnu_pbds;
+using ll = long long;
+template <typename T>
+using OST = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+#define sz(x) (int)(x).size()
+#define all(x) x.begin(), x.end()
+#define psb push_back
+#define ppb pop_back
+#define endl '\n'
+#define fi first
+#define se second
+#define lb lower_bound
+#define ub upper_bound
+const int MOD = 1e9 + 7;
+const int MAXN = 2e5 + 1;
+const string NoF = "Name_of_File";
+    
+void solve() {
+    int n, q; cin >> n >> q;
+    vector<int> h(n);
+    for (int &x : h) cin >> x;
+    vector<int> left(n), right(n);
+    stack<int> st;
+    for (int i = n-1; i >= 0; i--) {
+        while(!st.empty() && h[i] >= h[st.top()]) st.pop();
+        if (st.empty()) right[i] = i;
+        else right[i] = st.top();
+        st.push(i);
     }
-
-    // Tính toán mảng right_max
-    right_max[N - 1] = N - 1;
-    for (int i = N - 2; i >= 0; --i) {
-        if (h[i] > h[i + 1]) {
-            right_max[i] = right_max[i + 1];
-        } else {
-            right_max[i] = i;
-        }
+    while(!st.empty()) st.pop();
+    for (int i = 0; i < n; i++) {
+        while(!st.empty() && h[i] >= h[st.top()]) st.pop();
+        if (st.empty()) left[i] = i;
+        else left[i] = st.top();
+        st.push(i);
     }
-}
-
-void handle_queries() {
-    for (int i = 0; i < Q; ++i) {
-        int x, k;
-        cin >> x >> k;
-        int current_col = x - 1;
-        long long max_height = h[current_col];
-
-        // Duyệt qua từng lần nhảy
-        for (int j = 0; j < k; ++j) {
-            if (left_max[current_col] != current_col) {
-                current_col = left_max[current_col];
-                max_height = max(max_height, h[current_col]);
-            } else if (right_max[current_col] != current_col) {
-                current_col = right_max[current_col];
-                max_height = max(max_height, h[current_col]);
-            } else {
-                break;
+    vector<vector<int>> blift(n,vector<int>((int)log2(n)+2));
+    for (int i = 0; i < n; i++) {
+        if (right[i] == i && left[i] == i) blift[i][0] = i;
+        else if (right[i] == i) blift[i][0] = left[i];
+        else if (left[i] == i) blift[i][0] = right[i];
+        else {
+            if (abs(i-right[i]) < abs(i-left[i])) blift[i][0] = right[i];
+            else if (abs(i-right[i]) > abs(i-left[i])) blift[i][0] = left[i];
+            else {
+                if (h[left[i]] < h[right[i]]) blift[i][0] = right[i];
+                else if (h[left[i]] > h[right[i]]) blift[i][0] = left[i];
             }
         }
-        cout << max_height << endl;
+    }
+    for (int k = 1; k < (int)log2(n)+2; k++) {
+        for (int i = 0; i < n; i++) {
+            blift[i][k] = blift[blift[i][k-1]][k-1];
+        }
+    }
+    while (q--) {
+        int p, k; cin >> p >> k;
+        --p;
+        int i = 0;
+        while(k) {
+            if (k&1) p = blift[p][i];
+            k >>= 1;
+            ++i;
+        }
+        cout << h[p] << endl;
     }
 }
-
+    
 int main() {
-    cin >> N >> Q;
-    h.resize(N);
-    left_max.resize(N);
-    right_max.resize(N);
-
-    // Đọc độ cao của các cột
-    for (int i = 0; i < N; ++i) {
-        cin >> h[i];
+    // freopen((NoF + ".in").c_str(), "r", stdin);
+    // freopen((NoF + ".out").c_str(), "w", stdout);
+    ios_base::sync_with_stdio(0);
+    cin.tie(0); cout.tie(0);
+    int t = 1;
+    while(t--) {
+        solve();
     }
-
-    preprocess();
-    handle_queries();
-
-    return 0;
 }
-

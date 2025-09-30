@@ -23,7 +23,37 @@ void solve() {
     int n; cin >> n;
     vector<int> a(n);
     for (int &x : a) cin >> x;
-    
+    int q; cin >> q;
+    vector<pair<pair<int,int>,int>> query(q);
+    for (int i = 0; i < q; i++) {
+        int l, r; cin >> l >> r;
+        --l, --r;
+        query[i] = {{l,r},i};
+    }
+    int s = (int)sqrt(n);
+    sort(all(query),[&](auto &a, auto &b){
+        if (a.fi.fi / s != b.fi.fi / s) return a.fi.fi / s < b.fi.fi / s;
+        return a.fi.se < b.fi.se;
+    });
+    int cl = 0, cr= -1, val = 0;
+    vector<int> kq(q), sl(1e6+5,0);
+    auto ad = [&](int i) {
+        sl[a[i]]++;
+        if (sl[a[i]] == 1) val++; 
+    };
+    auto rm = [&](int i) {
+        sl[a[i]]--;
+        if (sl[a[i]] == 0) val--;
+    };
+    for (auto [lr,id] : query) {
+        auto [l,r] = lr;
+        while(cr < r) ad(++cr);
+        while(cl < l) rm(cl++);
+        while(cr > r) rm(cr--);
+        while(cl > l) ad(--cl);
+        kq[id] = val;
+    }
+    for (int x : kq) cout << x << endl;
 }
     
 int main() {

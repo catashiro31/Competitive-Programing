@@ -18,37 +18,33 @@ using OST = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_
 const int MOD = 1e9 + 7;
 const int MAXN = 2e5 + 1;
 const string NoF = "Name_of_File";
-int vp_in_fact(int n, int v) {
-    int s = 0;
-    while (n) {
-        n /= v;
-        s += n;
+int cur = 0, p = -1;
+void dfs(int u, int par, const vector<int> adjList[], int d) {
+    if (d > cur) {
+        cur = max(d,cur);
+        p = u;
     }
-    return s;
+    for (int v : adjList[u]) {
+        if (v == par) continue;
+        dfs(v,u,adjList,d+1);
+    }
 }
 void solve() {
-    int n, p; cin >> n >> p;
-    if (p == 1) { cout << 0 << '\n'; return; }
-    int x = p;
-    vector<pair<int,int>> fact;
-    for (int i = 2; i*i <= x; i++) {
-        if (x % i == 0) {
-            int cnt = 0;
-            while (x % i == 0) {
-                x /= i;
-                cnt++;
-            }
-            fact.psb({i,cnt});
-        }
+    int n; cin >> n;
+    vector<int> adjList[n];
+    vector<int> outgree(n,0);
+    for(int i = 0; i < n-1; i++) {
+        int u, v; cin >> u >> v;
+        --u, --v;
+        adjList[u].psb(v);
+        adjList[v].psb(u);
     }
-    if (x > 1) fact.push_back({x, 1});
-    int ans = INT_MAX;
-    for (pair<int,int> pi : fact) {
-        int v = pi.fi, a = pi.se;
-        int res = vp_in_fact(n,v);
-        ans = min(ans,res/a);
+    if (n == 1) cout << 0 << endl;
+    else {
+        dfs(0,-1,adjList,0);
+        dfs(p,-1,adjList,0);
+        cout << cur*3;
     }
-    cout << ans;
 }
     
 int main() {

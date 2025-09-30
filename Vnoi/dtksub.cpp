@@ -18,37 +18,36 @@ using OST = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_
 const int MOD = 1e9 + 7;
 const int MAXN = 2e5 + 1;
 const string NoF = "Name_of_File";
-int vp_in_fact(int n, int v) {
-    int s = 0;
-    while (n) {
-        n /= v;
-        s += n;
-    }
-    return s;
-}
+    
 void solve() {
-    int n, p; cin >> n >> p;
-    if (p == 1) { cout << 0 << '\n'; return; }
-    int x = p;
-    vector<pair<int,int>> fact;
-    for (int i = 2; i*i <= x; i++) {
-        if (x % i == 0) {
-            int cnt = 0;
-            while (x % i == 0) {
-                x /= i;
-                cnt++;
+    int n, k; cin >> n >> k;
+    string s; cin >> s;
+    vector<ll> hashT(n+1,0), p(n+1,1);
+    for (int i = 1; i <= n; i++) {
+        hashT[i] = (hashT[i-1] * 31 + s[i-1]-'a'+1) % MOD;
+        p[i] = (p[i-1] * 31) % MOD;
+    }
+    auto get_hash = [&](int l, int r) {
+        return ((hashT[r] - hashT[l] * p[r-l]) % MOD + MOD) % MOD;
+    };
+    int l = 1, r = n;
+    int kq = l;
+    while (l <= r) {
+        int m = (r+l) >> 1;
+        unordered_map<ll,int> sl;
+        bool c = false;
+        for (int i = 0; i+m <= n; i++) {
+            ll hash = get_hash(i,i+m);
+            sl[hash]++;
+            if (sl[hash] >= k) {
+                c = true;
+                break;
             }
-            fact.psb({i,cnt});
         }
+        if (c) kq = m, l = m+1;
+        else r = m-1; 
     }
-    if (x > 1) fact.push_back({x, 1});
-    int ans = INT_MAX;
-    for (pair<int,int> pi : fact) {
-        int v = pi.fi, a = pi.se;
-        int res = vp_in_fact(n,v);
-        ans = min(ans,res/a);
-    }
-    cout << ans;
+    cout << kq;
 }
     
 int main() {
