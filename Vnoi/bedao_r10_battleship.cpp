@@ -10,6 +10,7 @@ using OST = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_
 #define all(x) x.begin(), x.end()
 #define psb push_back
 #define ppb pop_back
+#define endl '\n'
 #define fi first
 #define se second
 #define lb lower_bound
@@ -17,45 +18,55 @@ using OST = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_
 const int MOD = 1e9 + 7;
 const int MAXN = 2e5 + 1;
 const string NoF = "Name_of_File";
-int par[MAXN];
-int Find(int u) {
-    if (par[u] == u) return u;
-    return par[u] = Find(par[u]);
+void dfs(int u, int par, int val, const vector<vector<int>> &adjList, vector<int> &vis) {
+    vis[u] = val;
+    for (int v : adjList[u]) {
+        if (vis[v] || v == par) continue;
+        dfs(v,u,val,adjList,vis);
+    }
 }
-void Union(int u, int v) {
-    int pu = Find(u), pv = Find(v);
-    if (pu == pv) return;
-    if (pu < pv) par[pv] = pu;
-    else par[pu] = pv;
-    return;
-}
+    
 void solve() {
     int n, m; cin >> n >> m;
-    for (int i = 1; i <= n; i++) par[i] = i;
-    int arr[4];
-    arr[0] = INT_MIN, arr[1] = INT_MAX, arr[2] = INT_MIN, arr[3] = INT_MAX;
-    while (m--) {
+    vector<bool> c(1e6+5,false);
+    for (int i = 0; i < m; i++) {
         int x; cin >> x;
-        if (x <= (n+1)/2) arr[0] = max(arr[0],x), arr[1] = min(arr[1],x);
-        else arr[2] = max(arr[2],x), arr[3] = min(arr[3],x);
+        --x;
+        c[x] = true;
     }
-    for (int i = 0; i < 4; i++) {
-        int u = 1, v = n;
-        while (u <= v) {
-            if (u == arr[i]) u++;
-            if (v == arr[i]) v--;
-            Union(u,v);
-            u++, v--;
+    vector<vector<int>> adjList(n);
+    int l = 0, r = n-1;
+    int cntl = 0, cntr = 0;
+    while (l <= r) {
+        if (cntl > 0) {
+            adjList[r+1].psb(l);
+            adjList[l].psb(r+1);
         }
-    } 
-    for (int i = 1; i <= n; i++) cout << Find(i) << " ";
+        if (cntr > 0) {
+            adjList[l-1].psb(r);
+            adjList[r].psb(l-1);
+        }
+        if (c[l]) cntl++;
+        if (c[r]) cntr++;
+        if (cntl+cntr < m) {
+            adjList[l].psb(r);
+            adjList[r].psb(l);
+        }
+        l++, r--;
+    }
+    vector<int> vis(n,0);
+    int j = 1;
+    for (int i = 0; i < n; i++) {
+        if (vis[i]) continue;
+        dfs(i,-1,j,adjList,vis);
+        j++;
+    }
+    for (int x : vis) cout << x << " ";
 }
     
 int main() {
-#ifndef ONLINE_JUDGE
     // freopen((NoF + ".in").c_str(), "r", stdin);
     // freopen((NoF + ".out").c_str(), "w", stdout);
-#endif
     ios_base::sync_with_stdio(0);
     cin.tie(0); cout.tie(0);
     int t = 1;
