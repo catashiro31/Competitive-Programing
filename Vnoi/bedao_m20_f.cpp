@@ -18,67 +18,71 @@ using OST = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_
 const int MOD = 1e9 + 7;
 const int MAXN = 5e5 + 1;
 const string NoF = "Name_of_File";
-vector<int> segB(4*MAXN,INT_MAX), segC(4*MAXN,INT_MAX);
-vector<int> lazyB(4*MAXN,INT_MAX), lazyC(4*MAXN,INT_MAX);
-vector<int> A(MAXN), B(MAXN), C(MAXN);
-
-void update(int id, vector<int> &segtree, vector<int> &lazy, int l, int r, int u, int v, int val) {
+int A[MAXN], B[MAXN], C[MAXN];
+int T[MAXN], X[MAXN], Y[MAXN], K[MAXN];
+int segt[4*MAXN];
+int kq[MAXN];
+void push (int id) {
+    if (segt[id] == 0) return;
+    segt[id<<1] = segt[id];
+    segt[id<<1|1] = segt[id];
+    segt[id] = 0;
+}
+void update(int id, int l, int r, int u, int v, int val) {
     if (r < u || v < l) return;
     if (u <= l && r <= v) {
-        segtree[id] = val;
-        lazy[id] = val;
+        segt[id] = val;
         return;
     }
     int m = (l+r)>>1;
-    if (lazy[id] != INT_MAX) {
-        segtree[id<<1] = segtree[id<<1|1] = lazy[id];
-        lazy[id<<1] = lazy[id<<1|1] = lazy[id];
-        lazy[id] = INT_MAX;
-    }
-    update(id<<1,segtree,lazy,l,m,u,v,val);
-    update(id<<1|1,segtree,lazy,m+1,r,u,v,val);
+    push(id);
+    update(id<<1,l,m,u,v,val);
+    update(id<<1|1,m+1,r,u,v,val);
 }
 
-int get(int id, vector<int> &segtree, vector<int> &lazy, int l, int r, int p) {
-    if (l == r) return segtree[id];
+int get(int id, int l, int r, int p) {
+    if (l == r) return segt[id];
     int m = (l+r)>>1;
-    if (lazy[id] != INT_MAX) {
-        segtree[id<<1] = segtree[id<<1|1] = lazy[id];
-        lazy[id<<1] = lazy[id<<1|1] = lazy[id];
-        lazy[id] = INT_MAX;
-    }
-    if (p <= m) return get(id<<1,segtree,lazy,l,m,p);
-    else return get(id<<1|1,segtree,lazy,m+1,r,p);
+    push(id);
+    if (p <= m) return get(id<<1,l,m,p);
+    else return get(id<<1|1,m+1,r,p);
 }
-
 
 void solve() {
     int n, q; cin >> n >> q;
     for (int i = 1; i <= n; i++) cin >> A[i];
     for (int i = 1; i <= n; i++) cin >> B[i];
-    for (int i = 1; i <= n; i++) cin >> C[i]; 
-    while (q--) {
-        int t; cin >> t;
-        if (t == 1) {
-            int x, y, k; cin >> x >> y >> k;
-            update(1,segB,lazyB,1,n,y,y+k-1,x-y);
-        } else if (t== 2) {
-            int x, y, k; cin >> x >> y >> k;
-            update(1,segC,lazyC,1,n,y,y+k-1,x-y);
-        } else {
-            int x; cin >> x;
-            int getc = get(1,segC,lazyC,1,n,x);
-            if (getc == INT_MAX) cout << C[x] << endl;
+    for (int i = 1; i <= n; i++) cin >> C[i];
+    memset(segt,0,sizeof(segt));
+    vector<pair<int,int>> queries[q+2];
+    for (int i = 1; i <= q; i++) {
+        cin >> T[i];
+        if (T[i] == 1 || T[i] == 2) cin >> X[i] >> Y[i] >> K[i];
+        else cin >> X[i];
+        if (T[i] == 2) update(1,1,n,Y[i],Y[i]+K[i]-1,i);
+        else if (T[i] == 3) {
+            int v = get(1,1,n,X[i]);
+            if (v == 0) kq[i] = C[X[i]];
             else {
-                x = x + getc;
-                int getb = get(1,segB,lazyB,1,n,x);
-                if (getb == INT_MAX) cout << B[x] << endl;
-                else {
-                    x = x + getb;
-                    cout << A[x] << endl;
-                }
+                int np = X[v] + (X[i] - Y[v]);
+                queries[v].psb({np,i});
             }
         }
+    }
+    memset(segt,0,sizeof(segt));
+    for (int i = 1; i <= q; i++) {
+        if (T[i] == 1) update(1,1,n,Y[i],Y[i]+K[i]-1,i);
+        for (auto [np,i] : queries[i]) {
+            int pos = get(1,1,n,np);
+            if (pos == 0) kq[i] = B[np];
+            else {
+                int npos = X[pos] + np - Y[pos];
+                kq[i] = A[npos];
+            } 
+        }
+    }
+    for (int i = 1; i <= q; i++) {
+        if (T[i] == 3) cout << kq[i] << endl;
     }
 }
     

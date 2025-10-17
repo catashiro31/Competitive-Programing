@@ -16,90 +16,48 @@ using OST = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_
 #define lb lower_bound
 #define ub upper_bound
 const int MOD = 1e9 + 7;
-const int MAXN = 1e5 + 1;
+const int MAXN = 2e5 + 1;
 const string NoF = "Name_of_File";
-struct mimasu {
-    ll cmin, cmax, csum;
-};
-struct mimagcd {
-    ll cmin, cmax, cgcd;
-};
-mimasu init1;
-mimagcd init2;
-mimasu segtree[4*MAXN];
-mimagcd segdiff[4*MAXN];
-ll a[MAXN], diff[MAXN];
-void build(int id, int l, int r) {
-    if (l == r) {
-        segtree[id].cmin = a[l];
-        segtree[id].cmax = a[l];
-        segtree[id].csum = a[l];
-        segdiff[id].cmin = diff[l];
-        segdiff[id].cmax = diff[l];
-        segdiff[id].cgcd = diff[l];
-        return;
-    }
-    int m = (l+r)>>1;
-    build(id<<1, l, m);
-    build(id<<1|1, m+1, r);
-    segtree[id].cmin = min(segtree[id<<1].cmin, segtree[id<<1|1].cmin);
-    segtree[id].cmax = max(segtree[id<<1].cmax, segtree[id<<1|1].cmax);
-    segtree[id].csum = segtree[id<<1].csum + segtree[id<<1|1].csum;
-    segdiff[id].cmin = min(segdiff[id<<1].cmin, segdiff[id<<1|1].cmin);
-    segdiff[id].cmax = max(segdiff[id<<1].cmax, segdiff[id<<1|1].cmax);
-    segdiff[id].cgcd = gcd(segdiff[id<<1].cgcd,segdiff[id<<1|1].cgcd);
-}
-
-mimasu get1(int id, int l, int r, int u, int v) {
-    if (r < u || v < l) return init1;
-    if (u <= l && r <= v) return segtree[id];
-    int m = (l+r)>>1;
-    mimasu g1 = get1(id<<1,l,m,u,v), g2 = get1(id<<1|1,m+1,r,u,v);
-    mimasu res;
-    res.cmin = min(g1.cmin, g2.cmin);
-    res.cmax = max(g1.cmax, g2.cmax);
-    res.csum = g1.csum + g2.csum;
-    return res;
-}
-
-mimagcd get2(int id, int l, int r, int u, int v) {
-    if (r < u || v < l) return init2;
-    if (u <= l && r <= v) return segdiff[id];
-    int m = (l+r)>>1;
-    mimagcd g1 = get2(id<<1,l,m,u,v), g2 = get2(id<<1|1,m+1,r,u,v);
-    mimagcd res;
-    res.cmin = min(g1.cmin, g2.cmin);
-    res.cmax = max(g1.cmax, g2.cmax);
-    res.cgcd = gcd(g1.cgcd, g2.cgcd);
-    return res;
-}
 
 void solve() {
-    int n, m; cin >> n >> m;
-    for (int i = 1; i <= n; i++) cin >> a[i];
-    diff[1]  = 0;
-    for (int i = 2; i <= n; i++) diff[i] = abs(a[i-1] - a[i]);
-    build(1,1,n);
-    init1.cmin = LLONG_MAX, init1.cmax = LLONG_MIN, init1.csum = 0;
-    init2.cmin = LLONG_MAX, init2.cmax = LLONG_MAX, init2.cgcd = 0;
-    while (m--) {
-        ll u, v; cin >> u >> v;
-        if (v - u <= 1LL) cout << "YES" << endl;
-        else {
-            mimasu inf = get1(1,1,n,u,v);
-            ll sl = v - u + 1;
-            if ((inf.cmax - inf.cmin) % (sl-1) != 0) cout << "NO" << endl;
-            else if (inf.cmax == inf.cmin) cout << "NO" << endl;
-            else {
-                ll cs = (inf.cmax - inf.cmin) / (sl-1);
-                if (((inf.csum - sl*inf.cmin) % (1LL*(sl-1)*sl/2) != 0) || ((inf.csum - sl*inf.cmin) / (1LL*(sl-1)*sl/2) != cs)) cout << "NO"<< endl;
-                else {
-                    mimagcd dif = get2(1,1,n,u+1,v);
-                    if (dif.cgcd % cs != 0 || dif.cmin < cs) cout << "NO" << endl;
-                    else cout << "YES" << endl;
-                }
-            }
+    ll n, q; cin >> n >> q;
+    ll arr[n+1];
+    for (ll i = 1; i <= n; i++) cin >> arr[i];
+    ll k = log2(n)+1;
+    ll cmin[k][n+1], cmax[k][n+1], cgcd[k][n+1], cprev[k][n+1];
+    for (ll i = 1; i <= n; i++) cmin[0][i] = cmax[0][i] = arr[i];
+    for (ll i = 2; i <= n; i++) cgcd[0][i] = abs(arr[i]-arr[i-1]);
+    unordered_map<ll,ll> prv;
+    for (ll i = 1; i<= n; i++) {
+        if (prv[arr[i]]) cprev[0][i] = prv[arr[i]];
+        else cprev[0][i] = 0;
+        prv[arr[i]] = i;
+    } 
+    for (ll i = 1; i < k; i++) {
+        for (ll j = 1; j + (1<<i)-1 <= n; j++) {
+            cmin[i][j] = min(cmin[i-1][j],cmin[i-1][j+(1<<(i-1))]);
+            cmax[i][j] = max(cmax[i-1][j],cmax[i-1][j+(1<<(i-1))]);
+            cprev[i][j] = max(cprev[i-1][j],cprev[i-1][j+(1<<(i-1))]);
         }
+        for (ll j = 2; j + (1<<i)-1 <= n; j++) {
+            cgcd[i][j] = gcd(cgcd[i-1][j], cgcd[i-1][j+(1<<(i-1))]);
+        }
+    }
+    while (q--) {
+        ll l, r; cin >> l >> r;
+        if (l > r) swap(l,r);
+        ll k1 = log2(r-l+1), k2 = log2(r-l);
+        ll vmax = max(cmax[k1][l],cmax[k1][r-(1<<k1)+1]);
+        ll vmin = min(cmin[k1][l], cmin[k1][r-(1<<k1)+1]);
+        ll vgcd = gcd(cgcd[k2][l+1], cgcd[k2][r-(1<<k2)+1]);
+        ll vprev = max(cprev[k1][l],cprev[k1][r-(1<<k1)+1]);
+        if (r == l) cout << "NO" << endl; 
+        else if (((vmax-vmin) == 0) || ((vmax-vmin)%(r-l) != 0) || vprev >= l) cout << "NO" << endl;
+        else {
+            ll d = (vmax-vmin)/(r-l);
+            if (vgcd % d != 0) cout << "NO" << endl;
+            else cout << "YES" << endl;
+        } 
     }
 }
     
