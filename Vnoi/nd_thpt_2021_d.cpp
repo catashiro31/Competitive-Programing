@@ -21,8 +21,8 @@ void solve() {
 }
 
 int main() {
-	freopen("WORK.INP",stdin);
-//	freopen("WORK.OUT",stdout);
+	freopen("WORK.INP", "r", stdin);
+    freopen("WORK.OUT", "w", stdout);
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
 

@@ -1,51 +1,61 @@
 #include<bits/stdc++.h>
 using namespace std;
-using ll = long long;
 #define all(x) x.begin(), x.end()
 #define psb push_back
 #define sz(x) x.size()
+#define int long long
+#define MOD 1000000007
+#define MAXN 200005
 
 void solve() {
 	int n; cin >> n;
-	vector<pair<int,int>> arr(n+1);
-	for (int i = 1; i <= n; i++) {
-		int c, t; cin >> c >> t;
-		arr[i] = {c,t};
+	vector<int> c(n), t(n);
+	for (int i = 0; i < n; i++) {
+		cin >> c[i] >> t[i];
+		--c[i];
 	}
-	int l = 1, r = 10000, kq = -1;
+	int l = 0, r=1e18, kq = 0; 
 	while (l <= r) {
-		int m = (r+l)>>1;
-		vector<int> check(n+1,0);
-		bool sc = true;
-		for (int i = 1; i <= n; i++) {
-			bool c = false;
-			for (int j = 1; j <= n; j++) {
-//				cout << i << " " << j << " " << abs(arr[j].first-i)*arr[j].second << endl;
-				if (abs(arr[j].first-i)*arr[j].second <= m) {
-					check[j] = 1;
-					c = true;
-				}
+		int m = (l+r)>>1;
+		bool check = true;
+		vector<pair<int,int>> limit(n);
+		for (int i = 0; i < n; i++) {
+			int x = m/t[i];
+			int u = max(0LL, c[i]-x);
+			int v = min(n-1, c[i]+x);
+			limit[i] = {u, v};
+		}
+		sort(all(limit));
+		priority_queue<int, vector<int>, greater<int>> pq;
+        int limit_idx = 0;
+		for (int pos = 0; pos < n; ++pos) {
+			while(limit_idx < n && limit[limit_idx].first <= pos) {
+				pq.push(limit[limit_idx].second);
+				limit_idx++;
 			}
-			if (!c) {
-				sc = false;
+			if (pq.empty()) {
+				check = false;
+				break;
+			}
+			int R_min = pq.top(); pq.pop();
+			if (R_min < pos) {
+				check = false;
 				break;
 			}
 		}
-//		cout << m << endl;
-//		for (int i = 1; i <= n; i++) cout << check[i] << " ";
-//		cout << endl;
-		for (int i = 1; i <= n; i++) if (!check[i]) sc = false;
-		if (sc) kq = m, r = m-1;
+		if (check) {
+            kq = m;
+            r = m-1;
+        }
 		else l = m+1;
 	}
-	cout << kq;
+	cout << kq << endl;
 }
 
-int main() {
+signed main() {
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
 
 	int t = 1;
 	while(t--) solve();
-	return 0;
 }

@@ -5,29 +5,40 @@ using ll = long long;
 #define psb push_back
 #define sz(x) x.size()
 
+ll get_log(ll x, ll log) {
+	ll res = 0;
+	while (x) {
+		res++;
+		x /= log;
+	}	
+	return res-1;
+}
+
 void solve() {
-	int l, r; cin >> l >> r;
+	ll l, r; cin >> l >> r;
 	vector<bool> c(1e6+1,false);
-	vector<int> snt;
-	for (int i = 2; i*i <= 1e6; i++) {
+	vector<ll> snt;
+	for (ll i = 2; i <= 1e6; i++) {
 		if (c[i]) continue;
 		snt.psb(i);
-		if (i > sqrt(1e6)) continue;
-		for (int j = i*i; j <= 1e6; j+=i) c[j] = true; 
+		for (ll j = i*i; j <= 1e6; j+=i) c[j] = true; 
 	}
-	vector<int> kq;
-	for (int i = 0; i < snt.size(); i++) {
-		for (int j = 1; j < snt.size(); j++) {
-			if (pow(snt[i],snt[j]-1) <= 1e6) kq.push_back(pow(snt[i],snt[j]-1));
-		}
+	vector<ll> exp;
+	for (int i = 1; i < sz(snt); i++) exp.psb(snt[i]-1);
+	ll kq = 0;
+	for (ll i = 0; i < snt.size(); i++) {
+		if (snt[i]*snt[i] > r) break;
+		ll logi_l = get_log(l,snt[i]), logi_r = get_log(r,snt[i]);
+		ll lb = lower_bound(all(exp),logi_l) - exp.begin();
+		ll ub = upper_bound(all(exp),logi_r) - exp.begin();
+		if (pow(snt[i],exp[lb]) < l) lb++;
+		kq += max(0LL,ub-lb);
 	}
-	sort(all(kq));
-//	for (int x : kq) cout << x << " ";
-	cout << upper_bound(all(kq),r) - lower_bound(all(kq),l) << endl;
+	cout << kq;
 }
 int main() {
-	freopen("BAI4.INP","r",stdin);
-	freopen("BAI4.OUT","w",stdout);
+//	freopen("BAI4.INP","r",stdin);
+//	freopen("BAI4.OUT","w",stdout);
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
 

@@ -1,38 +1,56 @@
-#include <bits/stdc++.h>
-#include <ext/pb_ds/assoc_container.hpp>
-#include <ext/pb_ds/tree_policy.hpp>
+#include<bits/stdc++.h>
 using namespace std;
-using namespace __gnu_pbds;
-using ll = long long;
-template <typename T>
-using OST = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-#define sz(x) (int)(x).size()
 #define all(x) x.begin(), x.end()
 #define psb push_back
-#define ppb pop_back
-#define endl '\n'
 #define fi first
 #define se second
-#define lb lower_bound
-#define ub upper_bound
-const int MOD = 1e9 + 7;
-const int MAXN = 2e5 + 1;
-const string NoF = "Name_of_File";
+#define sz(x) x.size()
+#define int long long
+#define MOD 1000000007
+#define MAXN 300005
 
 void solve() {
-    int n; cin >> n;
-    int next[n];
+	int n; cin >> n;
+	vector<int> arr(n);
+	for (int &x : arr) cin >> x;
+	stack<pair<int,int>> st;
+	int kq = 0;
+	for (int i = 0; i < n; i++) {
+		if (!st.empty() && arr[st.top().fi] == arr[i]) {
+			auto [v,sl] = st.top(); st.pop();
+			st.push({v,sl+1});	
+			continue;
+		}
+		while(!st.empty() && arr[st.top().fi] < arr[i]) {
+			auto [v,sl] = st.top();
+			kq += sl;
+			st.pop();
+		}
+		if (!st.empty()) st.push({i,1});
+		else st.push({i,2});
+	}
+	while(!st.empty()) st.pop();
+	for (int i = n-1; i >= 0; i--) {
+		if (!st.empty() && arr[st.top().fi] == arr[i]) {
+			auto [v,sl] = st.top(); st.pop();
+			st.push({v,sl+1});	
+			continue;
+		}
+		while(!st.empty() && arr[st.top().fi] < arr[i]) {
+			auto [v,sl] = st.top();
+			kq += sl;
+			st.pop();
+		}
+		if (!st.empty()) st.push({i,1});
+		else st.push({i,1});
+	}
+	cout << kq;
 }
-    
-int main() {
-#ifndef ONLINE_JUDGE
-    // freopen((NoF + ".in").c_str(), "r", stdin);
-    // freopen((NoF + ".out").c_str(), "w", stdout);
-#endif
-    ios_base::sync_with_stdio(0);
-    cin.tie(0); cout.tie(0);
-    int t = 1;
-    while(t--) {
-        solve();
-    }
+
+signed main() {
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+
+	int t = 1;
+	while(t--) solve();
 }

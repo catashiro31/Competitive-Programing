@@ -1,91 +1,72 @@
-#include <bits/stdc++.h>
-#include <ext/pb_ds/assoc_container.hpp>
-#include <ext/pb_ds/tree_policy.hpp>
+#include<bits/stdc++.h>
 using namespace std;
-using namespace __gnu_pbds;
-using ll = long long;
-template <typename T>
-using OST = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-#define sz(x) (int)(x).size()
 #define all(x) x.begin(), x.end()
 #define psb push_back
-#define ppb pop_back
-#define endl '\n'
 #define fi first
 #define se second
-#define lb lower_bound
-#define ub upper_bound
-const int MOD = 1e9 + 7;
-const int MAXN = 2e5 + 1;
-const string NoF = "Name_of_File";
-ll fact[MAXN], inv[MAXN];
-ll inv_modulo(ll base, ll exp) {
-	ll res = 1;
-	while (exp) {
-		if (exp&1) res = (res * base) % MOD;
-		base = (base * base) % MOD;
-		exp /= 2;
-	}
-	return res;
-}
-ll combination(ll n, ll k) {
-	if (k > n || k < 0 || n < 0) return 0;
-	ll res = fact[n];
-	res = (res * inv[k]) % MOD;
-	res = (res * inv[n-k]) % MOD;
-	return res;
-}
-void init(void) {
-	fact[0] = 1, inv[0] = inv_modulo(fact[0],MOD-2);
-	for (int i = 1;  i < MAXN; i++) {
-		fact[i] = (fact[i-1] * i) % MOD;
-		inv[i] = inv_modulo(fact[i],MOD-2);
-	}
-}
+#define sz(x) x.size()
+#define int long long
+#define MOD 1000000007
+#define MAXN 200005
+
+//int inv(int base, int exp) {
+//	int res = 1;
+//	while(exp) {
+//		if (exp&1) res = (res * base) % MOD;
+//		base = (base * base) % MOD;
+//		exp /= 2;
+//	}
+//	return res;
+//}
+
 void solve() {
-	int m, n, k; cin >> m >> n >> k;
-	vector<vector<bool>> blocked(1e3+3, vector<bool>(1e3+3, false));
-	int maxr = 1, maxc = 1;
+	int n, m, k; cin >> n >> m >> k;
+	vector<vector<int>> dp(1001,vector<int>(1001,0));
+	dp[0][0] = 1;
+	vector<vector<bool>> block(1001,vector<bool>(1001,false));
 	for (int i = 0; i < k; i++) {
-		int r, c; cin >> r >> c;
-		blocked[r][c] = true;
-		maxr = max(maxr,r);
-		maxc = max(maxc,c);
+		int x, y; cin >> x >> y;
+		--x, --y;
+		block[x][y] = true;
 	}
-	init();
-	vector<vector<ll>> dp(maxr+1, vector<ll>(maxc+1,0));
-	dp[1][1] = 1;
-	for (int i = 1; i <= maxr; i++) {
-		for (int j = 1; j <= maxc; j++) {
-			if (i == 1 && j == 1) continue;
-			if (blocked[i][j]) continue;
-			dp[i][j] = (dp[i-1][j] + dp[i][j-1]) % MOD;
+	int dx[] = {-1,0};
+	int dy[] = {0,-1};
+	for (int i = 0; i < 1001; i++) {
+		for (int j = 0; j < 1001; j++) {
+			if (block[i][j]) continue;
+			for (int z = 0; z < 2; z++) {
+				int nx = dx[z] + i, ny = dy[z] + j;
+				if (nx < 0 || ny < 0) continue;
+				dp[i][j] = (dp[i][j] + dp[nx][ny]) % MOD;
+			}
 		}
 	}
-	if (m == maxr && n == maxc) cout << dp[maxr][maxc];
+	if (n <= 1000 && m <= 1000) cout << dp[n-1][m-1];
 	else {
-		ll kq = 0;
-		for (int i = 1; i <= maxr; i++) {
-			ll value = (dp[i][maxc] * combination(m-i + n-maxc-1, m-i)) % MOD;
-			kq = (kq + value) % MOD;
+		vector<int> exp2(1e5+5);
+		exp2[0] = 1;
+		for (int i = 1; i < 1e5+5; i++) exp2[i] = (exp2[i-1] * 2) % MOD;
+		int kq = 0;
+		if (n > 1000) {
+			for (int j = 0; j < min(m,1000LL); j++) {
+				int d = (m-1-j) + (n-1-999);
+				kq = (kq+dp[999][j]*exp2[d]) % MOD;
+			}
 		}
-		for (int j = 1; j <= maxc; j++) {
-			ll value = (dp[maxr][j] * combination(m-maxr-1 + n-j, n-j)) % MOD;
-			kq = (kq + value) % MOD;
+		if (m > 1000) {
+			for (int j = 0; j < min(1000LL,n); j++) {
+				int d = (m-1-999) + (n-1-j);
+				kq = (kq+dp[j][999]*exp2[d]) % MOD;
+			}
 		}
 		cout << kq;
 	}
 }
-	
-int main() {
-#ifndef ONLINE_JUDGE
-	// freopen((NoF + ".in").c_str(), "r", stdin);
-	// freopen((NoF + ".out").c_str(), "w", stdout);
-#endif
-	ios_base::sync_with_stdio(0);
-	cin.tie(0); cout.tie(0);
+
+signed main() {
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+
 	int t = 1;
-	while(t--) {
-		solve();
-	}
+	while(t--) solve();
 }
